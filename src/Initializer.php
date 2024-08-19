@@ -26,7 +26,7 @@ final class Initializer {
 
     private function __construct() {
         \add_filter( 'woocommerce_queue_class', $this->change_queue_class( ... ), 99, 0 );
-        \add_action( 'init', Scheduler::instance( ... ), 11, 0 );
+        // \add_action( 'init', Dispatcher::instance( ... ), 0 );
     }
 
     /**

@@ -3,20 +3,9 @@
 namespace XWC\Queue\Traits;
 
 trait Queueable {
-    /**
-	 * Flatten multidimensional arrays to store for scheduling.
-	 *
-	 * @param array $args Argument array.
-	 * @return string
-	 */
-	public function flatten_args( $args ) {
-		$flattened = array();
+    abstract public static function get_action(): string;
 
-		foreach ( $args as $arg ) {
-			$flattened[] = \is_array( $arg ) ? $this->flatten_args( $arg ) : $arg;
-		}
+    abstract public function get_params(): array;
 
-		$string = '[' . \implode( ',', $flattened ) . ']';
-		return $string;
-	}
+    abstract public function handle();
 }

@@ -2,43 +2,41 @@
 
 namespace XWC\Queue;
 
-use XWC\Queue\Interfaces\Batched_Job;
-use XWC\Queue\Traits\Schedulable;
-
-class Batch extends Job {
-    use Schedulable;
-
-    protected Batched_Job $job;
+class Batch {
+    /**
+     * The batch name.
+     *
+     * @var string
+     */
+    public $name = '';
 
     /**
-     * Undocumented function
+     * The jobs that belong to the batch.
      *
-     * @param  array $params Job parameters.
-     * @param  array{job: class-string<Batched_Job>} $batch Batch parameters.
+     * @var array
      */
-    public function __construct( $params, $batch ) {
-        $this->job = ( new $batch['job']( ...$params ) )
-            ->set_batch( $batch['num'], $batch['size'], $batch['total'] )
-            ->prev_action( $batch['prev'] );
+    public array $jobs;
+
+	/**
+		* The batch options.
+		*
+		* @var array
+		*/
+    public array $options = array();
+
+    public function __construct( ...$jobs ) {
+        $this->jobs = $jobs;
     }
 
-    public function hook(): string {
-        return $this->job->hook();
-    }
+    public function add( iterable|object $jobs ): static {
+        if ( ! \is_array( $jobs ) ) {
+            $jobs = array( $jobs );
+        }
 
-    public function params(): array {
-        return $this->job->params();
-    }
+        foreach ( $jobs as $job ) {
+            $this->jobs[] = $job;
+        }
 
-    public function handle( ?object $processor = null ): void {
-        \error_log(
-            \sprintf(
-                'Dispatching %d items. Batch (%d of %d).',
-                $this->job->batch_size(),
-                $this->job->batch_num(),
-                $this->job->batch_total(),
-            ),
-        );
-        // No-op.
+        return $this;
     }
 }

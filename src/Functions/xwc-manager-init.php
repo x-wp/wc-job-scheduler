@@ -9,8 +9,6 @@
 use XWC\Queue\Initializer;
 
 if ( ! function_exists( 'xwc_queue_init' ) && function_exists( 'add_action' ) ) :
-
-
     function xwc_queue_init(): void {
         Initializer::run();
     }
