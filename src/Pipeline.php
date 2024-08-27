@@ -125,30 +125,45 @@ class Pipeline {
      * @return \Closure
      */
     protected function carry() {
-        return fn( $stack, $pipe ) => $this->handle_carry( 'a' );
-        // return fn( $stack, $pipe ) => function ( $passable ) use ( $stack, $pipe ) {
-        //         try {
-        //             if ( \is_callable( $pipe ) ) {
-        //                 // If the pipe is a callable, then we will call it directly, but otherwise we
-        //                 // will resolve the pipes out of the dependency container and call it with
-        //                 // the appropriate method and arguments, returning the results back out.
-        //                 return $pipe( $passable, $stack );
-        //             }
+        return fn( $stack, $pipe ) => fn( $passable ) => ! \is_callable( $pipe )
+            ? $this->create_carrier( $passable, $stack, $pipe )
+            : $this->call_pipe( $passable, $stack, $pipe, );
+    }
 
-        //             // If the pipe is already an object we'll just make a callable and pass it to
-        //             // the pipe as-is. There is no need to do any extra parsing and formatting
-        //             // since the object we're given was already a fully instantiated object.
-        //             $parameters = array( $passable, $stack );
+    protected function call_pipe( $passable, $stack, $pipe ) {
+        try {
+            return $pipe( $passable, $stack );
+        } catch ( \Throwable $e ) {
+            return $this->handle_exception( $passable, $e );
+        }
+    }
 
-        //             $carry = \method_exists( $pipe, $this->method )
-        //                             ? $pipe->{$this->method}( ...$parameters )
-        //                             : $pipe( ...$parameters );
+    protected function create_carrier( $passable, $stack, $pipe ) {
+        try {
+            if ( ! \is_object( $pipe ) ) {
+                [ $name, $parameters ] = $this->parse_pipe( $pipe );
 
-        //             return $this->handle_carry( $carry );
-        //         } catch ( \Throwable $e ) {
-        //             return $this->handle_exception( $passable, $e );
-        //         }
-        //     }
+                // If the pipe is a string we will parse the string and resolve the class out
+                // of the dependency injection container. We can then build a callable and
+                // execute the pipe function giving in the parameters that are required.
+                $pipe = new $name();
+
+                $parameters = \array_merge( array( $passable, $stack ), $parameters );
+            } else {
+                // If the pipe is already an object we'll just make a callable and pass it to
+                // the pipe as-is. There is no need to do any extra parsing and formatting
+                // since the object we're given was already a fully instantiated object.
+                $parameters = array( $passable, $stack );
+            }
+
+            $carry = \method_exists( $pipe, $this->method )
+                ? $pipe->{$this->method}( ...$parameters )
+                : $pipe( ...$parameters );
+
+            return $this->handle_carry( $carry );
+        } catch ( \Throwable $e ) {
+            return $this->handle_exception( $passable, $e );
+        }
     }
 
     /**

@@ -2,40 +2,95 @@
 
 namespace XWC\Queue\Traits;
 
-use XWC\Queue\Job_Callback;
-use XWC\Queue\Scheduler;
+use XWC\Queue\Interfaces\Is_Unique;
 
 trait Schedulable {
-    protected bool $unique = false;
+    protected $schedule_args = array();
 
-    public function unique(): bool {
-        return $this->unique;
+    protected array $job_meta;
+
+    private function get_default_schedule_arg( $name ) {
+        return match ( $name ) {
+            'unique' => $this instanceof Is_Unique,
+            'priority' => 10,
+            default => $this->schedule_args[ $name ] ?? null,
+        };
     }
 
-    public static function enqueue( ...$args ): Job_Callback {
-        return static::schedule( ...$args )->now()->save();
+    protected function get_default_schedule_group(): string {
+        if ( ! isset( $this->hook ) && ! ( $this instanceof Is_Unique ) ) {
+            return 'xwc_job';
+        }
+
+        return '';
     }
 
-    public static function schedule( ...$args ): Job_Callback {
-        $job = new static( ...$args );
-        return Scheduler::job( $job )->schedule();
+    public function __isset( $name ) {
+        return isset( $this->$name ) || isset( $this->schedule_args[ $name ] );
     }
 
-    public function args(): array {
-        //phpcs:disable SlevomatCodingStandard.Arrays.AlphabeticallySortedByKeys
-        return array(
-            'job'  => static::class,
-            'args' => $this->params(),
-        );
-        //phpcs:enable SlevomatCodingStandard.Arrays.AlphabeticallySortedByKeys
+    public function __set( $name, $value ) {
+        if ( null === $value ) {
+            return;
+        }
+
+        $this->schedule_args[ $name ] = $value;
     }
 
-    public function data(): array {
-        return array(
-            'args'   => $this->args(),
-            'group'  => $this->group(),
-            'hook'   => $this->hook(),
-            'unique' => $this->unique(),
-        );
+    public function __get( $name ) {
+        return $this->$name ?? $this->get_default_schedule_arg( $name );
+    }
+
+    public function with_hook( ?string $hook ): static {
+        if ( $hook ) {
+            $this->hook = $hook;
+        }
+
+        return $this;
+    }
+
+    public function with_group( ?string $group ): static {
+        if ( $group ) {
+            $this->group = $group;
+        }
+
+        return $this;
+    }
+
+    public function with_meta( array $meta ): static {
+        $this->job_meta = $meta;
+
+        return $this;
+    }
+
+    public function get_hook(): string {
+        $hook = \xwc_get_hook( $this->hook ?? static::class, );
+        $ext  = '';
+
+        if ( $this instanceof Is_Unique ) {
+            $ext = \is_bool( $this->unique_id() ) ? '' : '_' . $this->unique_id();
+        }
+
+        return $hook . $ext;
+    }
+
+    public function get_group(): string {
+        return match ( true ) {
+            isset( $this->group ) => $this->group,
+            isset( $this->hook )  => '',
+            default               => 'xwc_job',
+        };
+    }
+
+    public function get_meta(): array {
+        return $this->job_meta ?? array();
+    }
+
+    public function is_unique(): bool {
+        return $this instanceof Is_Unique || isset( $this->unique ) && $this->unique;
+    }
+
+    protected function has_hook(): bool {
+        return isset( $this->hook ) && $this->hook;
     }
 }

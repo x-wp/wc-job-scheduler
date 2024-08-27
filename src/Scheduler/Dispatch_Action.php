@@ -1,10 +1,11 @@
 <?php
 
-namespace XWC\Queue;
+namespace XWC\Queue\Scheduler;
 
+use XWC\Queue\Dispatcher;
 use XWC\Queue\Interfaces\Can_Dispatch;
 
-class Pending_Dispatch {
+class Dispatch_Action {
     /**
      * Indicates if the job should be dispatched immediately after sending the response.
      *
@@ -15,18 +16,6 @@ class Pending_Dispatch {
     public function __construct(
         protected readonly Can_Dispatch $job,
 	) {
-    }
-
-    /**
-     * Set the desired delay in seconds for the job.
-     *
-     * @param  \DateTimeInterface|\DateInterval|int|null  $delay
-     * @return $this
-     */
-    public function delay( $delay ) {
-        $this->job->delay( $delay );
-
-        return $this;
     }
 
     /**

@@ -25,17 +25,25 @@ final class Initializer {
     }
 
     private function __construct() {
+        \add_filter( 'action_scheduler_store_class', $this->change_as_store_class( ... ), 10000, 0 );
         \add_filter( 'woocommerce_queue_class', $this->change_queue_class( ... ), 99, 0 );
-        // \add_action( 'init', Dispatcher::instance( ... ), 0 );
     }
 
     /**
      * Register the integration
      *
-     * @param  class-string<XWC_Queue_Definition> $queue_class The queue classname.
-     * @return array
+     * @return class-string<\XWC_Queue_Definition>
      */
     private function change_queue_class(): string {
         return \XWC_Queue::class;
+    }
+
+    /**
+     * Change the Action Scheduler store class.
+     *
+     * @return class-string<\XWC_Action_Store>
+     */
+    private function change_as_store_class(): string {
+        return \XWC_Action_Store::class;
     }
 }

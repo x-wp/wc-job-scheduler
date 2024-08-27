@@ -3,7 +3,6 @@
 namespace XWC\Queue\Traits;
 
 use Carbon\Carbon;
-use InvalidArgumentException;
 use XWC_Schedule;
 
 trait Schedule_Frequency_Methods {
@@ -11,7 +10,7 @@ trait Schedule_Frequency_Methods {
      * The Cron expression representing the event's frequency.
      *
      * @param  string  $expression
-     * @return $this
+     * @return static
      */
     public function cron( $expression ) {
         $this->expression = $expression;
@@ -34,11 +33,25 @@ trait Schedule_Frequency_Methods {
     }
 
     /**
+     * Delay the event by the given amount of time.
+     *
+     * @param  int    $delay
+     * @return static
+     */
+    public function delay( int $delay ): static {
+        $this->timestamp = Carbon::parse( $this->get_timestamp(), $this->get_timezone() )
+            ->addSeconds( $delay )
+            ->getTimestamp();
+
+        return $this;
+    }
+
+    /**
      * Schedule the event to run between start and end time.
      *
      * @param  string  $start_time
-     * @param  string  $endTime
-     * @return $this
+     * @param  string  $end_time
+     * @return static
      */
     public function between( $start_time, $end_time ) {
         return $this->when( $this->in_time_interval( $start_time, $end_time ) );
@@ -49,7 +62,7 @@ trait Schedule_Frequency_Methods {
      *
      * @param  string  $start_time
      * @param  string  $end_time
-     * @return $this
+     * @return static
      */
     public function unless_between( $start_time, $end_time ) {
         return $this->skip( $this->in_time_interval( $start_time, $end_time ) );
@@ -71,9 +84,9 @@ trait Schedule_Frequency_Methods {
 
         if ( $end_time->lessThan( $start_time ) ) {
             if ( $start_time->greaterThan( $now ) ) {
-                $start_time = $start_time->subDay( 1 );
+                $start_time = $start_time->subDay();
             } else {
-                $end_time = $end_time->addDay( 1 );
+                $end_time = $end_time->addDay();
             }
         }
 
@@ -81,90 +94,31 @@ trait Schedule_Frequency_Methods {
     }
 
     /**
-     * Schedule the event to run every second.
+     * Shortcut to schedule the event to run in N number of minutes.
      *
-     * @return $this
+     * @param  int    $num_minutes The number of minutes to wait.
+     * @return static
      */
-    public function every_second() {
-        return $this->repeat_every( 1 );
-    }
-
-    /**
-     * Schedule the event to run every two seconds.
-     *
-     * @return $this
-     */
-    public function every_two_seconds() {
-        return $this->repeat_every( 2 );
-    }
-
-    /**
-     * Schedule the event to run every five seconds.
-     *
-     * @return $this
-     */
-    public function every_five_seconds() {
-        return $this->repeat_every( 5 );
-    }
-
-    /**
-     * Schedule the event to run every ten seconds.
-     *
-     * @return $this
-     */
-    public function every_ten_seconds() {
-        return $this->repeat_every( 10 );
-    }
-
-    /**
-     * Schedule the event to run every fifteen seconds.
-     *
-     * @return $this
-     */
-    public function every_fifteen_seconds() {
-        return $this->repeat_every( 15 );
-    }
-
-    /**
-     * Schedule the event to run every twenty seconds.
-     *
-     * @return $this
-     */
-    public function every_twenty_seconds() {
-        return $this->repeat_every( 20 );
-    }
-
-    /**
-     * Schedule the event to run every thirty seconds.
-     *
-     * @return $this
-     */
-    public function every_thirty_seconds() {
-        return $this->repeat_every( 30 );
-    }
-
-    /**
-     * Schedule the event to run multiple times per minute.
-     *
-     * @param  int  $seconds
-     * @return $this
-     */
-    protected function repeat_every( $seconds ) {
-        if ( 0 !== 60 % $seconds ) {
-            throw new \InvalidArgumentException(
-                \esc_html( "The seconds [$seconds] are not evenly divisible by 60." ),
-            );
-        }
-
-        $this->repeat_sec = $seconds;
-
-        return $this->every_minute();
+    public function every( int $num_minutes ): static {
+        return match ( true ) {
+            1 === $num_minutes  => $this->every_minute(),
+            2 === $num_minutes  => $this->every_two_minutes(),
+            3 === $num_minutes  => $this->every_three_minutes(),
+            4 === $num_minutes  => $this->every_four_minutes(),
+            5 === $num_minutes  => $this->every_five_minutes(),
+            10 === $num_minutes => $this->every_ten_minutes(),
+            15 === $num_minutes => $this->every_fifteen_minutes(),
+            30 === $num_minutes => $this->every_thirty_minutes(),
+            60 === $num_minutes => $this->hourly(),
+            60 > $num_minutes   => $this->every( $num_minutes % 60 ),
+            default             => $this->cron( "*/{$num_minutes} * * * *" ),
+        };
     }
 
     /**
      * Schedule the event to run every minute.
      *
-     * @return $this
+     * @return static
      */
     public function every_minute() {
         return $this->splice_into( 1, '*' );
@@ -173,7 +127,7 @@ trait Schedule_Frequency_Methods {
     /**
      * Schedule the event to run every two minutes.
      *
-     * @return $this
+     * @return static
      */
     public function every_two_minutes() {
         return $this->splice_into( 1, '*/2' );
@@ -182,7 +136,7 @@ trait Schedule_Frequency_Methods {
     /**
      * Schedule the event to run every three minutes.
      *
-     * @return $this
+     * @return static
      */
     public function every_three_minutes() {
         return $this->splice_into( 1, '*/3' );
@@ -191,7 +145,7 @@ trait Schedule_Frequency_Methods {
     /**
      * Schedule the event to run every four minutes.
      *
-     * @return $this
+     * @return static
      */
     public function every_four_minutes() {
         return $this->splice_into( 1, '*/4' );
@@ -200,7 +154,7 @@ trait Schedule_Frequency_Methods {
     /**
      * Schedule the event to run every five minutes.
      *
-     * @return $this
+     * @return static
      */
     public function every_five_minutes() {
         return $this->splice_into( 1, '*/5' );
@@ -209,7 +163,7 @@ trait Schedule_Frequency_Methods {
     /**
      * Schedule the event to run every ten minutes.
      *
-     * @return $this
+     * @return static
      */
     public function every_ten_minutes() {
         return $this->splice_into( 1, '*/10' );
@@ -218,7 +172,7 @@ trait Schedule_Frequency_Methods {
     /**
      * Schedule the event to run every fifteen minutes.
      *
-     * @return $this
+     * @return static
      */
     public function every_fifteen_minutes() {
         return $this->splice_into( 1, '*/15' );
@@ -227,7 +181,7 @@ trait Schedule_Frequency_Methods {
     /**
      * Schedule the event to run every thirty minutes.
      *
-     * @return $this
+     * @return static
      */
     public function every_thirty_minutes() {
         return $this->splice_into( 1, '0,30' );
@@ -236,7 +190,7 @@ trait Schedule_Frequency_Methods {
     /**
      * Schedule the event to run hourly.
      *
-     * @return $this
+     * @return static
      */
     public function hourly() {
         return $this->splice_into( 1, 0 );
@@ -246,7 +200,7 @@ trait Schedule_Frequency_Methods {
      * Schedule the event to run hourly at a given offset in the hour.
      *
      * @param  array|string|int  $offset
-     * @return $this
+     * @return static
      */
     public function hourly_at( $offset ) {
         return $this->hourly_schedule( $offset, '*' );
@@ -256,7 +210,7 @@ trait Schedule_Frequency_Methods {
      * Schedule the event to run every odd hour.
      *
      * @param  array|string|int  $offset
-     * @return $this
+     * @return static
      */
     public function every_odd_hour( $offset = 0 ) {
         return $this->hourly_schedule( $offset, '1-23/2' );
@@ -266,7 +220,7 @@ trait Schedule_Frequency_Methods {
      * Schedule the event to run every two hours.
      *
      * @param  array|string|int  $offset
-     * @return $this
+     * @return static
      */
     public function every_two_hours( $offset = 0 ) {
         return $this->hourly_schedule( $offset, '*/2' );
@@ -276,7 +230,7 @@ trait Schedule_Frequency_Methods {
      * Schedule the event to run every three hours.
      *
      * @param  array|string|int  $offset
-     * @return $this
+     * @return static
      */
     public function every_three_hours( $offset = 0 ) {
         return $this->hourly_schedule( $offset, '*/3' );
@@ -286,7 +240,7 @@ trait Schedule_Frequency_Methods {
      * Schedule the event to run every four hours.
      *
      * @param  array|string|int  $offset
-     * @return $this
+     * @return static
      */
     public function every_four_hours( $offset = 0 ) {
         return $this->hourly_schedule( $offset, '*/4' );
@@ -296,7 +250,7 @@ trait Schedule_Frequency_Methods {
      * Schedule the event to run every six hours.
      *
      * @param  array|string|int  $offset
-     * @return $this
+     * @return static
      */
     public function every_six_hours( $offset = 0 ) {
         return $this->hourly_schedule( $offset, '*/6' );
@@ -305,7 +259,7 @@ trait Schedule_Frequency_Methods {
     /**
      * Schedule the event to run daily.
      *
-     * @return $this
+     * @return static
      */
     public function daily() {
         return $this->hourly_schedule( 0, 0 );
@@ -315,7 +269,7 @@ trait Schedule_Frequency_Methods {
      * Schedule the event to run daily at a given time (10:00, 19:30, etc).
      *
      * @param  string  $time
-     * @return $this
+     * @return static
      */
     public function daily_at( $time ) {
         $segments = \explode( ':', $time );
@@ -331,7 +285,7 @@ trait Schedule_Frequency_Methods {
      *
      * @param  int  $first
      * @param  int  $second
-     * @return $this
+     * @return static
      */
     public function twice_daily( $first = 1, $second = 13 ) {
         return $this->twice_daily_at( $first, $second, 0 );
@@ -343,7 +297,7 @@ trait Schedule_Frequency_Methods {
      * @param  int  $first
      * @param  int  $second
      * @param  int  $offset
-     * @return $this
+     * @return static
      */
     public function twice_daily_at( $first = 1, $second = 13, $offset = 0 ) {
         $hours = $first . ',' . $second;
@@ -356,7 +310,7 @@ trait Schedule_Frequency_Methods {
      *
      * @param  array|string|int  $minutes
      * @param  array|string|int  $hours
-     * @return $this
+     * @return static
      */
     protected function hourly_schedule( $minutes, $hours ) {
         $minutes = \is_array( $minutes ) ? \implode( ',', $minutes ) : $minutes;
@@ -370,7 +324,7 @@ trait Schedule_Frequency_Methods {
     /**
      * Schedule the event to run only on weekdays.
      *
-     * @return $this
+     * @return static
      */
     public function weekdays() {
         return $this->days( XWC_Schedule::MONDAY . '-' . XWC_Schedule::FRIDAY );
@@ -379,7 +333,7 @@ trait Schedule_Frequency_Methods {
     /**
      * Schedule the event to run only on weekends.
      *
-     * @return $this
+     * @return static
      */
     public function weekends() {
         return $this->days( XWC_Schedule::SATURDAY . ',' . XWC_Schedule::SUNDAY );
@@ -388,7 +342,7 @@ trait Schedule_Frequency_Methods {
     /**
      * Schedule the event to run only on Mondays.
      *
-     * @return $this
+     * @return static
      */
     public function mondays() {
         return $this->days( XWC_Schedule::MONDAY );
@@ -397,7 +351,7 @@ trait Schedule_Frequency_Methods {
     /**
      * Schedule the event to run only on Tuesdays.
      *
-     * @return $this
+     * @return static
      */
     public function tuesdays() {
         return $this->days( XWC_Schedule::TUESDAY );
@@ -406,7 +360,7 @@ trait Schedule_Frequency_Methods {
     /**
      * Schedule the event to run only on Wednesdays.
      *
-     * @return $this
+     * @return static
      */
     public function wednesdays() {
         return $this->days( XWC_Schedule::WEDNESDAY );
@@ -415,7 +369,7 @@ trait Schedule_Frequency_Methods {
     /**
      * Schedule the event to run only on Thursdays.
      *
-     * @return $this
+     * @return static
      */
     public function thursdays() {
         return $this->days( XWC_Schedule::THURSDAY );
@@ -424,7 +378,7 @@ trait Schedule_Frequency_Methods {
     /**
      * Schedule the event to run only on Fridays.
      *
-     * @return $this
+     * @return static
      */
     public function fridays() {
         return $this->days( XWC_Schedule::FRIDAY );
@@ -433,7 +387,7 @@ trait Schedule_Frequency_Methods {
     /**
      * Schedule the event to run only on Saturdays.
      *
-     * @return $this
+     * @return static
      */
     public function saturdays() {
         return $this->days( XWC_Schedule::SATURDAY );
@@ -442,7 +396,7 @@ trait Schedule_Frequency_Methods {
     /**
      * Schedule the event to run only on Sundays.
      *
-     * @return $this
+     * @return static
      */
     public function sundays() {
         return $this->days( XWC_Schedule::SUNDAY );
@@ -451,7 +405,7 @@ trait Schedule_Frequency_Methods {
     /**
      * Schedule the event to run weekly.
      *
-     * @return $this
+     * @return static
      */
     public function weekly() {
         return $this->splice_into( 1, 0 )
@@ -464,7 +418,7 @@ trait Schedule_Frequency_Methods {
      *
      * @param  array|mixed  $day_of_week
      * @param  string  $time
-     * @return $this
+     * @return static
      */
     public function weekly_on( $day_of_week, $time = '0:0' ) {
         $this->daily_at( $time );
@@ -475,7 +429,7 @@ trait Schedule_Frequency_Methods {
     /**
      * Schedule the event to run monthly.
      *
-     * @return $this
+     * @return static
      */
     public function monthly() {
         return $this->splice_into( 1, 0 )
@@ -488,7 +442,7 @@ trait Schedule_Frequency_Methods {
      *
      * @param  int  $day_of_month
      * @param  string  $time
-     * @return $this
+     * @return static
      */
     public function monthly_on( $day_of_month = 1, $time = '0:0' ) {
         $this->daily_at( $time );
@@ -502,7 +456,7 @@ trait Schedule_Frequency_Methods {
      * @param  int  $first
      * @param  int  $second
      * @param  string  $time
-     * @return $this
+     * @return static
      */
     public function twice_monthly( $first = 1, $second = 16, $time = '0:0' ) {
         $days_of_month = $first . ',' . $second;
@@ -516,7 +470,7 @@ trait Schedule_Frequency_Methods {
      * Schedule the event to run on the last day of the month.
      *
      * @param  string  $time
-     * @return $this
+     * @return static
      */
     public function last_day_of_month( $time = '0:0' ) {
         $this->daily_at( $time );
@@ -527,7 +481,7 @@ trait Schedule_Frequency_Methods {
     /**
      * Schedule the event to run quarterly.
      *
-     * @return $this
+     * @return static
      */
     public function quarterly() {
         return $this->splice_into( 1, 0 )
@@ -541,7 +495,7 @@ trait Schedule_Frequency_Methods {
      *
      * @param  int  $day_of_qt
      * @param  string  $time
-     * @return $this
+     * @return static
      */
     public function quarterly_on( $day_of_qt = 1, $time = '0:0' ) {
         $this->daily_at( $time );
@@ -553,7 +507,7 @@ trait Schedule_Frequency_Methods {
     /**
      * Schedule the event to run yearly.
      *
-     * @return $this
+     * @return static
      */
     public function yearly() {
         return $this->splice_into( 1, 0 )
@@ -568,7 +522,7 @@ trait Schedule_Frequency_Methods {
      * @param  int  $month
      * @param  int|string  $day_of_month
      * @param  string  $time
-     * @return $this
+     * @return static
      */
     public function yearly_on( $month = 1, $day_of_month = 1, $time = '0:0' ) {
         $this->daily_at( $time );
@@ -581,7 +535,7 @@ trait Schedule_Frequency_Methods {
      * Set the days of the week the command should run on.
      *
      * @param  array|mixed  $days
-     * @return $this
+     * @return static
      */
     public function days( $days ) {
         $days = \is_array( $days ) ? $days : \func_get_args();
@@ -593,7 +547,7 @@ trait Schedule_Frequency_Methods {
      * Set the timezone the date should be evaluated on.
      *
      * @param  \DateTimeZone|string  $timezone
-     * @return $this
+     * @return static
      */
     public function timezone( $timezone ) {
         $this->timezone = $timezone;
@@ -612,11 +566,11 @@ trait Schedule_Frequency_Methods {
     /**
      * Splice the given value into the given position of the expression.
      *
-     * @param  int  $position
-     * @param  string  $value
-     * @return $this
+     * @param  int        $position
+     * @param  string|int $value
+     * @return static
      */
-    protected function splice_into( $position, $value ) {
+    protected function splice_into( $position, $value ): static {
         if ( 'once' === $this->expression ) {
             $this->cron( '* * * * *' );
         }

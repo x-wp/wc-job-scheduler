@@ -2,17 +2,17 @@
 
 namespace XWC\Queue\Traits;
 
-use XWC\Queue\Pending_Dispatch;
+use XWC\Queue\Scheduler\Dispatch_Action;
 
-trait Job_Dispatch_Methods {
+trait Dispatchable {
     protected \DateTimeInterface|\DateInterval|array|int|null $delay = null;
 
     public static function dispatch( ...$args ) {
-        return new Pending_Dispatch( new static( ...$args ) );
+        return new Dispatch_Action( new static( ...$args ) );
     }
 
     public static function dispatch_async( ...$args ) {
-        return ( new Pending_Dispatch( new static( ...$args ) ) )->async();
+        return ( new Dispatch_Action( new static( ...$args ) ) )->async();
     }
 
     /**
@@ -36,5 +36,12 @@ trait Job_Dispatch_Methods {
         $this->delay;
 
         return $this;
+    }
+
+    public function get_middleware(): array {
+        return \array_merge(
+            \method_exists( $this, 'middleware' ) ? $this->middleware() : array(),
+            $this->middleware ?? array(),
+        );
     }
 }

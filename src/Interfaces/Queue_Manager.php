@@ -1,9 +1,13 @@
 <?php
 
-use ActionScheduler_Action as AS_Action;
 use XWC\Queue\Job;
+use XWC\Queue\Scheduler\Canceled_Action;
+use XWC\Queue\Scheduler\Finished_Action;
+use XWC\Queue\Scheduler\Pending_Action;
 
-interface XWC_Queue_Definition extends WC_Queue_Interface {
+interface XWC_Queue_Definition {
+    public function unschedule( string $hook, array $args = array(), string $group = '' ): ?int;
+
     /**
 	 * Enqueue an action to run one time, as soon as possible
 	 *
@@ -12,7 +16,7 @@ interface XWC_Queue_Definition extends WC_Queue_Interface {
 	 * @param  string $group    The group to assign this job to.
      * @param  bool   $unique   Whether this job should be unique in the queue.
      * @param  int    $priority The priority of the action.
-	 * @return int The action ID.
+	 * @return int
 	 */
 	public function add( $hook, $args = array(), $group = '', bool $unique = false, int $priority = 10 );
 
@@ -25,7 +29,7 @@ interface XWC_Queue_Definition extends WC_Queue_Interface {
 	 * @param  string $group     The group to assign this job to.
      * @param  bool   $unique    Whether this job should be unique in the queue.
      * @param  int    $priority  The priority of the action.
-	 * @return int The action ID.
+	 * @return int
 	 */
     public function schedule_single( $timestamp, $hook, $args = array(), $group = '', bool $unique = false, int $priority = 10 );
 
@@ -42,7 +46,7 @@ interface XWC_Queue_Definition extends WC_Queue_Interface {
      *
      * @param  int    $interval_in_seconds  The interval in seconds. Legacy parameter, use $interval instead.
      *
-	 * @return int The action ID.
+	 * @return int
 	 */
     public function schedule_recurring( $timestamp, $interval = 0, $hook = '', $args = array(), $group = '', bool $unique = false, int $priority = 10, $interval_in_seconds = 0 );
 
@@ -57,7 +61,7 @@ interface XWC_Queue_Definition extends WC_Queue_Interface {
      * @param  bool   $unique     Whether this job should be unique in the queue.
      * @param  int    $priority   The priority of the action.
      *
-	 * @return string The action ID
+	 * @return int
      *
      * @see http://en.wikipedia.org/wiki/Cron
 	 *   *    *    *    *    *    *
@@ -75,7 +79,7 @@ interface XWC_Queue_Definition extends WC_Queue_Interface {
     /**
 	 * Find scheduled actions.
 	 *
-     * @param array{
+     * @param  array{
      *   group?: string,
      *   hook?: string,
      *   status?: 'complete'|'pending'|'failed'|'canceled'|'in-progress',
@@ -119,20 +123,22 @@ interface XWC_Queue_Definition extends WC_Queue_Interface {
 	 *     orderby => 'date' - accepted values are 'hook', 'group', 'modified', or 'date'.
      *
 	 *     order => 'ASC'
-	 * @param string $return_format OBJECT, ARRAY_A, or ids.
-	 * @return array<\AS_Action>|array<int>|array<array<string,mixed>>
+	 * @param  string $return_format OBJECT, ARRAY_A, or ids.
+	 * @return array<Pending_Action>|array<int>|array<array<string,mixed>>
 	 */
 	public function search( $args = array(), $return_format = OBJECT );
 
     /**
 	 * Get the DateTime for the next scheduled time an action should run.
 	 *
-	 * @param  AS_Action $action Action.
+	 * @param  Pending_Action $action Action.
 	 * @return DateTime|null
 	 */
-	public function get_next_action_time( ?AS_Action $action ): ?DateTime;
+	public function get_next_action_time( ?Pending_Action $action ): ?DateTime;
 
-    public function get_existing( Job $job ): bool;
+    public function get_existing( Pending_Action $job ): bool;
 
-    public function get_blocker( Job $job );
+    public function get_blocker( Pending_Action $job );
+
+    public function get_action( int $action_id ): Pending_Action|Canceled_Action|Finished_Action;
 }

@@ -14,5 +14,7 @@ interface Can_Schedule extends Can_Dispatch {
 
     public function get_group(): string;
 
+    public function get_args(): array;
+
     public function is_unique(): bool;
 }

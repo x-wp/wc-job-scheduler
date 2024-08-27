@@ -20,6 +20,7 @@
 			<property name="text_domain" type="array" extend="true">
 				<element value="default"/>
 				<element value="woocommerce"/>
+				<element value="xwc-job-manager"/>
 			</property>
 		</properties>
 	</rule>
@@ -40,6 +41,10 @@
 	</rule>
 
   <rule ref="SlevomatCodingStandard.Operators.SpreadOperatorSpacing">
+    <severity>0</severity>
+  </rule>
+
+  <rule ref="SlevomatCodingStandard.Classes.SuperfluousErrorNaming.SuperfluousSuffix">
     <severity>0</severity>
   </rule>
 

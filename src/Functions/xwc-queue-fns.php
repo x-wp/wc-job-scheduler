@@ -1,17 +1,38 @@
-<?php //phpcs:disable WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize
+<?php //phpcs:disable WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize, WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize
 
 use Laravel\SerializableClosure\SerializableClosure;
-use XWC\Queue\Dispatcher;
-use XWC\Queue\Interfaces\Can_Dispatch;
 
-function xwc_event( Can_Dispatch $job ) {
-    return Dispatcher::instance()->dispatch_to_executor( $job );
+/**
+ * Serialize a closure.
+ *
+ * @param  Closure|string $what The closure to serialize or the serialized closure.
+ * @return string               The serialized closure.
+ */
+function xwc_serialize_closure( Closure|string $what ): string {
+    return serialize( new SerializableClosure( $what ) );
 }
 
-function xwc_serialize_closure( Closure $closure ) {
-    return serialize( new SerializableClosure( $closure ) );
+/**
+ * Unserialize a closure.
+ *
+ * @param  string|Closure $what The serialized closure or the closure itself.
+ * @return Closure              The closure.
+ */
+function xwc_unserialize_closure( string|Closure $what ): Closure {
+    return unserialize( $what )->getClosure();
 }
 
-function xwc_unserialize_closure( string $serialized_closure ) {
-    return unserialize( $serialized_closure )->getClosure();
+/**
+ * Get the hook name for a target.
+ *
+ * @param  string|object $target The target to get the hook for.
+ * @param  string        $prefix The prefix to use. Default is 'xwc'.
+ * @return string
+ */
+function xwc_get_hook( string|object $target, string $prefix = 'xwc' ): string {
+    $prefix = $prefix ? rtrim( $prefix, '_' ) . '_' : '';
+    $target = is_object( $target ) ? $target::class : $target;
+    $hook   = \strtolower( \basename( \str_replace( '\\', '/', $target ) ) );
+
+    return class_exists( $target ) ? $prefix . $hook : $hook;
 }
