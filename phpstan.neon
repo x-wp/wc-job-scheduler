@@ -4,3 +4,17 @@ parameters:
     - src
   bootstrapFiles:
     - vendor/php-stubs/woocommerce-stubs/woocommerce-stubs.php
+  scanDirectories:
+    - vendor/woocommerce/action-scheduler/classes
+  scanFiles:
+    - vendor/woocommerce/action-scheduler/functions.php
+  ignoreErrors:
+    -
+      identifier: method.childReturnType
+      paths:
+        - src/Core/Action_Queue.php
+        - src/Interfaces/Queue_Manager.php
+    -
+      identifier: return.type
+      paths:
+        - src/Core/Action_Queue.php
