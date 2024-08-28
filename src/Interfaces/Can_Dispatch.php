@@ -1,6 +1,6 @@
 <?php
 
-namespace XWC\Queue\Interfaces;
+namespace XWC\Scheduler\Interfaces;
 
 interface Can_Dispatch {
     public function handle();

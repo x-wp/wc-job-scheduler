@@ -1,6 +1,6 @@
 <?php
 
-namespace XWC\Queue\Interfaces;
+namespace XWC\Scheduler\Interfaces;
 
 /**
  * Describes a job that can be scheduled.

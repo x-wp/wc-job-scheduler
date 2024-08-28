@@ -12,9 +12,9 @@ parameters:
     -
       identifier: method.childReturnType
       paths:
-        - src/Core/Job_Queue.php
+        - src/Core/Action_Queue.php
         - src/Interfaces/Queue_Manager.php
     -
       identifier: return.type
       paths:
-        - src/Core/Job_Queue.php
+        - src/Core/Action_Queue.php

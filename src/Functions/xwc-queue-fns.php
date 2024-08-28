@@ -29,7 +29,7 @@ function xwc_unserialize_closure( string|Closure $what ): Closure {
  * @param  string        $prefix The prefix to use. Default is 'xwc'.
  * @return string
  */
-function xwc_get_hook( string|object $target, string $prefix = 'xwc' ): string {
+function xwc_format_job_hook( string|object $target, string $prefix = 'xwc' ): string {
     $prefix = $prefix ? rtrim( $prefix, '_' ) . '_' : '';
     $target = is_object( $target ) ? $target::class : $target;
     $hook   = \strtolower( \basename( \str_replace( '\\', '/', $target ) ) );

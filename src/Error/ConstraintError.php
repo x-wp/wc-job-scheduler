@@ -1,6 +1,6 @@
 <?php
 
-namespace XWC\Queue\Error;
+namespace XWC\Scheduler\Error;
 
 class ConstraintError extends JobExecutionError {
     protected function formatMessage( string $message, string $hook ): string {

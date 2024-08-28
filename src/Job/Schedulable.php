@@ -1,8 +1,8 @@
 <?php
 
-namespace XWC\Queue\Traits;
+namespace XWC\Scheduler\Job;
 
-use XWC\Queue\Interfaces\Is_Unique;
+use XWC\Scheduler\Interfaces\Is_Unique;
 
 trait Schedulable {
     protected $schedule_args = array();
@@ -64,7 +64,7 @@ trait Schedulable {
     }
 
     public function get_hook(): string {
-        $hook = \xwc_get_hook( $this->hook ?? static::class, );
+        $hook = \xwc_format_job_hook( $this->hook ?? static::class, );
         $ext  = '';
 
         if ( $this instanceof Is_Unique ) {

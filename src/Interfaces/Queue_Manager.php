@@ -1,11 +1,13 @@
 <?php
 
-use XWC\Queue\Job;
-use XWC\Queue\Scheduler\Canceled_Action;
-use XWC\Queue\Scheduler\Finished_Action;
-use XWC\Queue\Scheduler\Pending_Action;
+namespace XWC\Scheduler\Interfaces;
 
-interface XWC_Queue_Definition {
+use DateTime;
+use XWC\Scheduler\Action\Canceled_Action;
+use XWC\Scheduler\Action\Finished_Action;
+use XWC\Scheduler\Action\Pending_Action;
+
+interface Queue_Manager {
     public function unschedule( string $hook, array $args = array(), string $group = '' ): ?int;
 
     /**

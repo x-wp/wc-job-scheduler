@@ -1,16 +1,17 @@
 <?php
 
 use Automattic\Jetpack\Constants;
-use XWC\Queue\Dispatcher;
-use XWC\Queue\Interfaces\Can_Dispatch;
-use XWC\Queue\Interfaces\Can_Schedule;
-use XWC\Queue\Scheduler\Callback_Action;
+use XWC\Scheduler\Action\Scheduled_Action;
+use XWC\Scheduler\Dispatcher;
+use XWC\Scheduler\Interfaces\Can_Dispatch;
+use XWC\Scheduler\Interfaces\Can_Schedule;
+use XWC\Scheduler\Interfaces\Queue_Manager;
 use XWP\Helper\Traits\Singleton;
 
 /**
  * Job scheduling class.
  *
- * @method static Callback_Action job( Can_Dispatch $job, ?string $hook = null, ?string $group = null ) Schedule a job.
+ * @method static Scheduled_Action job( Can_Dispatch $job, ?string $hook = null, ?string $group = null ) Schedule a job.
  */
 final class XWC_Schedule {
     use Singleton;
@@ -36,7 +37,7 @@ final class XWC_Schedule {
     /**
      * Registered
      *
-     * @var array<Callback_Action>
+     * @var array<Scheduled_Action>
      */
     private array $actions = array();
 
@@ -100,11 +101,11 @@ final class XWC_Schedule {
      * @param  T|class-string<T> $job Job to schedule.
      * @param  string|null         $hook
      * @param  string|null         $group
-     * @return Callback_Action
+     * @return Scheduled_Action
      *
      * @template T of Can_Dispatch|Can_Schedule
      */
-    private function job( Can_Dispatch|string $job, ?string $hook = null, ?string $group = null ): Callback_Action {
+    private function job( Can_Dispatch|Can_Schedule|string $job, ?string $hook = null, ?string $group = null ): Scheduled_Action {
         $cb = function ( array $params = array() ) use ( $job ) {
             if ( is_string( $job ) ) {
                 $job = new $job();
@@ -118,8 +119,8 @@ final class XWC_Schedule {
         return $this->call( $cb, $hook, $group );
     }
 
-    private function call( callable|Closure $cb, ?string $hook, ?string $group ): Callback_Action {
-        $action = ( new Callback_Action( $cb ) )
+    private function call( callable|Closure $cb, ?string $hook, ?string $group ): Scheduled_Action {
+        $action = ( new Scheduled_Action( $cb ) )
             ->hook( $hook )
             ->group( $group );
 
@@ -147,7 +148,7 @@ final class XWC_Schedule {
     /**
      * Register the integration
      *
-     * @return class-string<XWC_Queue_Definition>
+     * @return class-string<Queue_Manager>
      */
     private function change_queue_class(): string {
         return XWC_Queue::class;

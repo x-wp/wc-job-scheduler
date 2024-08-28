@@ -1,11 +1,11 @@
 <?php
 
-namespace XWC\Queue\Scheduler;
+namespace XWC\Scheduler\Action;
 
-use XWC\Queue\Dispatcher;
-use XWC\Queue\Interfaces\Can_Dispatch;
+use XWC\Scheduler\Dispatcher;
+use XWC\Scheduler\Interfaces\Can_Dispatch;
 
-class Dispatch_Action {
+class Dispatched_Action {
     /**
      * Indicates if the job should be dispatched immediately after sending the response.
      *

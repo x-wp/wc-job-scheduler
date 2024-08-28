@@ -1,16 +1,16 @@
 <?php
 
-namespace XWC\Queue\Scheduler;
+namespace XWC\Scheduler\Action;
 
 use Closure;
-use XWC\Queue\Dispatcher;
-use XWC\Queue\Error\ConstraintError;
-use XWC\Queue\Error\ConstraintInvalid;
-use XWC\Queue\Error\DependencyError;
-use XWC\Queue\Error\JobExecutionError;
-use XWC\Queue\Middleware\Check_Blockers;
-use XWC\Queue\Middleware\Verify_Conditions;
-use XWC\Queue\Pipeline;
+use XWC\Scheduler\Dispatcher;
+use XWC\Scheduler\Error\ConstraintError;
+use XWC\Scheduler\Error\ConstraintInvalid;
+use XWC\Scheduler\Error\DependencyError;
+use XWC\Scheduler\Error\JobExecutionError;
+use XWC\Scheduler\Middleware\Check_Blockers;
+use XWC\Scheduler\Middleware\Verify_Conditions;
+use XWC\Scheduler\Pipeline;
 
 /**
  * Default custom action class.

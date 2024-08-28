@@ -1,18 +1,18 @@
 <?php
 
-namespace XWC\Queue;
+namespace XWC\Scheduler;
 
 use Carbon\Carbon;
 use Closure;
-use XWC\Queue\Interfaces\Can_Dispatch;
-use XWC\Queue\Interfaces\Can_Schedule;
-use XWC_Queue_Definition;
+use XWC\Scheduler\Interfaces\Can_Dispatch;
+use XWC\Scheduler\Interfaces\Can_Schedule;
+use XWC\Scheduler\Interfaces\Queue_Manager;
 use XWP\Helper\Traits\Singleton;
 
 final class Dispatcher {
     use Singleton;
 
-    private static ?XWC_Queue_Definition $queue = null;
+    private static ?Queue_Manager $queue = null;
 
     private Pipeline $pipeline;
 
@@ -23,30 +23,30 @@ final class Dispatcher {
      */
     private array $async_jobs = array();
 
-    public static function queue(): XWC_Queue_Definition {
+    public static function queue(): Queue_Manager {
         return self::$queue ??= \WC()->queue();
     }
 
     private function __construct() {
-        $this->load_pipeline();
-        $this->load_own_hooks();
-
-        \do_action( 'xwc_dispatcher_init' );
-	}
-
-    private function load_pipeline(): void {
         $this->pipeline = new Pipeline();
-        // Need to implement this method.
-    }
-
-    private function load_own_hooks(): void {
         \add_action( 'shutdown', $this->dispatch_jobs( ... ), 100, 0 );
-    }
+	}
 
     public function dispatch_to_schedule( Can_Schedule $job, array $params = array() ): void {
         [ $params, $method ] = $this->parse_schedule_params( $job, $params );
 
         $id = self::queue()->$method( ...$params );
+
+        /**
+         * Fires after a job is scheduled.
+         *
+         * @param int          $id     Job ID.
+         * @param array        $params Job parameters.
+         * @param Can_Schedule $job    Job instance.
+         *
+         * @since 1.0.0
+         */
+        \do_action( 'xwc_job_scheduled', $id, $params, $job );
     }
 
     public function dispatch_to_shutdown( $job ): void {

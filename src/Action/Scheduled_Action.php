@@ -1,11 +1,11 @@
 <?php
 
-namespace XWC\Queue\Scheduler;
+namespace XWC\Scheduler\Action;
 
 use Closure;
-use XWC\Queue\Traits\Schedule_Frequency_Methods;
+use XWC\Scheduler\Job\Schedule_Frequency_Methods;
 
-class Callback_Action {
+class Scheduled_Action {
     use Schedule_Frequency_Methods;
 
     /**
@@ -160,7 +160,7 @@ class Callback_Action {
     }
 
     public function needs( string|object $job ): static {
-        $this->needs = \xwc_get_hook( $job );
+        $this->needs = \xwc_format_job_hook( $job );
 
         return $this;
     }

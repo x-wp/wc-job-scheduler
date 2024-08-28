@@ -1,6 +1,6 @@
 <?php
 
-namespace XWC\Queue\Error;
+namespace XWC\Scheduler\Error;
 
 abstract class JobExecutionError extends \Exception {
     public function __construct( protected readonly string $hook, string $message, $code = 0, \Throwable $previous = null ) {

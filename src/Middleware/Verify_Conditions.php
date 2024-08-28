@@ -1,10 +1,10 @@
 <?php
 
-namespace XWC\Queue\Middleware;
+namespace XWC\Scheduler\Middleware;
 
-use XWC\Queue\Error\ConstraintError;
-use XWC\Queue\Error\ConstraintInvalid;
-use XWC\Queue\Scheduler\Pending_Action;
+use XWC\Scheduler\Action\Pending_Action;
+use XWC\Scheduler\Error\ConstraintError;
+use XWC\Scheduler\Error\ConstraintInvalid;
 
 class Verify_Conditions {
     public function handle( Pending_Action $action, \Closure $next ) {

@@ -1,17 +1,15 @@
 <?php
 
-use ActionScheduler_Action as AS_Action;
-use XWC\Queue\Dispatcher;
-use XWC\Queue\Job;
-use XWC\Queue\Scheduler\Canceled_Action;
-use XWC\Queue\Scheduler\Finished_Action;
-use XWC\Queue\Scheduler\Null_Action;
-use XWC\Queue\Scheduler\Pending_Action;
+use XWC\Scheduler\Action\Canceled_Action;
+use XWC\Scheduler\Action\Finished_Action;
+use XWC\Scheduler\Action\Null_Action;
+use XWC\Scheduler\Action\Pending_Action;
+use XWC\Scheduler\Interfaces\Queue_Manager;
 
 /**
  * WooCommerce Queue Extension.
  */
-class XWC_Queue extends WC_Action_Queue implements XWC_Queue_Definition {
+class XWC_Queue extends WC_Action_Queue implements Queue_Manager {
     public function unschedule( string $hook, array $args = array(), string $group = '' ): ?int {
         return as_unschedule_action( $hook, $args, $group );
     }
@@ -96,11 +94,5 @@ class XWC_Queue extends WC_Action_Queue implements XWC_Queue_Definition {
 
     public function get_action( int $action_id ): Pending_Action|Canceled_Action|Finished_Action|Null_Action {
         return \ActionScheduler::store()->fetch_action( $action_id );
-    }
-
-    public function has_job_meta( AS_Action $action ): bool {
-        $args = $action->get_args();
-
-        return isset( $args['meta']['job'] );
     }
 }

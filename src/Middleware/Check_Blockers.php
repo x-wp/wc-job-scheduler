@@ -1,10 +1,10 @@
 <?php
 
-namespace XWC\Queue\Middleware;
+namespace XWC\Scheduler\Middleware;
 
-use XWC\Queue\Dispatcher;
-use XWC\Queue\Error\DependencyError;
-use XWC\Queue\Scheduler\Pending_Action;
+use XWC\Scheduler\Action\Pending_Action;
+use XWC\Scheduler\Dispatcher;
+use XWC\Scheduler\Error\DependencyError;
 
 class Check_Blockers {
     public function handle( Pending_Action $action, \Closure $next ) {

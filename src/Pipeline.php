@@ -1,11 +1,15 @@
 <?php
 
-namespace XWC\Queue;
+namespace XWC\Scheduler;
 
 use Closure;
-use RuntimeException;
 use Throwable;
 
+/**
+ * Job execution pipeline.
+ *
+ * Shamelessly copied from Laravel's Pipeline class.
+ */
 class Pipeline {
     /**
      * The object being passed through the pipeline.

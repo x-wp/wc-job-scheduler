@@ -1,6 +1,6 @@
 <?php
 
-namespace XWC\Queue\Traits;
+namespace XWC\Scheduler\Job;
 
 use Carbon\Carbon;
 use XWC_Schedule;

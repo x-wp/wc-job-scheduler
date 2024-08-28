@@ -1,6 +1,6 @@
 <?php
 
-namespace XWC\Queue\Scheduler;
+namespace XWC\Scheduler\Action;
 
 use ActionScheduler_NullSchedule as Null_Schedule;
 use ActionScheduler_Schedule as Schedule;

@@ -1,18 +1,18 @@
 <?php
 
-namespace XWC\Queue\Traits;
+namespace XWC\Scheduler\Job;
 
-use XWC\Queue\Scheduler\Dispatch_Action;
+use XWC\Scheduler\Action\Dispatched_Action;
 
 trait Dispatchable {
     protected \DateTimeInterface|\DateInterval|array|int|null $delay = null;
 
     public static function dispatch( ...$args ) {
-        return new Dispatch_Action( new static( ...$args ) );
+        return new Dispatched_Action( new static( ...$args ) );
     }
 
     public static function dispatch_async( ...$args ) {
-        return ( new Dispatch_Action( new static( ...$args ) ) )->async();
+        return ( new Dispatched_Action( new static( ...$args ) ) )->async();
     }
 
     /**

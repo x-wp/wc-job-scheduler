@@ -1,6 +1,6 @@
 <?php
 
-namespace XWC\Queue\Scheduler;
+namespace XWC\Scheduler\Action;
 
 /**
  * Null action class.

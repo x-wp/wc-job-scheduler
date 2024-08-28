@@ -1,9 +1,9 @@
 <?php //phpcs:disable WordPress.PHP.DevelopmentFunctions.error_log_error_log
 
-use XWC\Queue\Dispatcher;
-use XWC\Queue\Scheduler\Canceled_Action;
-use XWC\Queue\Scheduler\Finished_Action;
-use XWC\Queue\Scheduler\Pending_Action;
+use XWC\Scheduler\Action\Canceled_Action;
+use XWC\Scheduler\Action\Finished_Action;
+use XWC\Scheduler\Action\Pending_Action;
+use XWC\Scheduler\Dispatcher;
 
 class XWC_Action_Store extends ActionScheduler_DBStore {
     /**
