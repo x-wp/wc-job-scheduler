@@ -29,6 +29,12 @@ class Dispatched_Action {
         return $this;
     }
 
+    public function with_middleware( array $middleware ): static {
+        $this->job->with_middleware( $middleware );
+
+        return $this;
+    }
+
     /**
      * Handle the object's destruction.
      *

@@ -103,10 +103,10 @@ final class Dispatcher {
     }
 
     private function get_handler( Can_Dispatch $job ): object|false {
-        if ( ! isset( $job->handler ) ) {
-            return false;
-        }
-
-        return \class_exists( $job->handler ) ? new ( $job->handler )() : false;
+        return match ( true ) {
+            \method_exists( $job, 'get_handler' )       => $job->get_handler(),
+            \class_exists( $job->handler ?? '', false ) => new ( $job->handler )(),
+            default                                     => false,
+        };
     }
 }

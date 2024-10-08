@@ -73,8 +73,8 @@ class Pending_Action extends \ActionScheduler_Action {
         return $this->args['meta'] ?? array();
     }
 
-    public function get_blocker(): string {
-        return $this->get_meta()['needs'] ?? '';
+    public function get_blocker(): array {
+        return $this->get_meta()['needs'] ?? array();
     }
 
     public function get_retries(): int {
@@ -162,7 +162,7 @@ class Pending_Action extends \ActionScheduler_Action {
 
         \XWC_Schedule::job( $this->get_job() )
             ->delay( 300 )
-            ->needs( $this->get_blocker() )
+            ->needs( ...$this->get_blocker() )
             ->when( ...$this->get_filters() )
             ->skip( ...$this->get_rejects() );
     }

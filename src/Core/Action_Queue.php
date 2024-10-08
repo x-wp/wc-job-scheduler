@@ -74,22 +74,28 @@ class XWC_Queue extends WC_Action_Queue implements Queue_Manager {
     }
 
     public function get_blocker( Pending_Action $job ) {
-        $search_args = array(
-            'group'    => $job->get_group(),
-            'order'    => 'DESC',
-            'orderby'  => 'date',
-            'per_page' => 1,
-            'search'   => $job->get_blocker(), // search is used instead of hook to find queued batch creation.
-            'status'   => 'pending',
-        );
+        foreach ( $job->get_blocker() as $b ) {
+            $search_args = array(
+                'group'    => $job->get_group(),
+                'hook'     => $b, // search is used instead of hook to find queued batch creation.
+                'order'    => 'DESC',
+                'orderby'  => 'date',
+                'per_page' => 1,
+                'status'   => array( 'pending', 'in-progress' ),
+            );
 
-        $blocking = $job->get_blocker() ? $this->search( $search_args ) : array();
+            $blocking = $b ? $this->search( $search_args ) : array();
 
-        $blocking = \array_filter( $blocking, $this->has_next_action_time( ... ) );
+            $blocking = \array_filter( $blocking, $this->has_next_action_time( ... ) );
 
-        $blocking = current( $blocking );
+            $blocking = current( $blocking );
 
-        return $blocking ? $blocking : null;
+            if ( $blocking ) {
+                return $blocking;
+            }
+        }
+
+        return null;
     }
 
     public function get_action( int $action_id ): Pending_Action|Canceled_Action|Finished_Action|Null_Action {

@@ -7,7 +7,9 @@ use XWC\Scheduler\Action\Dispatched_Action;
 trait Dispatchable {
     protected \DateTimeInterface|\DateInterval|array|int|null $delay = null;
 
-    public static function dispatch( ...$args ) {
+    protected ?array $middleware = null;
+
+    public static function dispatch( ...$args ): Dispatched_Action {
         return new Dispatched_Action( new static( ...$args ) );
     }
 
@@ -34,6 +36,12 @@ trait Dispatchable {
      */
     public function no_delay(): static {
         $this->delay;
+
+        return $this;
+    }
+
+    public function with_middleware( array $middleware ): static {
+        $this->middleware = $middleware;
 
         return $this;
     }

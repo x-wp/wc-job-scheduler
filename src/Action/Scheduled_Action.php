@@ -53,9 +53,9 @@ class Scheduled_Action {
     /**
      * The array of jobs this action depends on.
      *
-     * @var string
+     * @var array
      */
-    protected string $needs = '';
+    protected array $needs = array();
 
     /**
      * The hook to trigger.
@@ -159,8 +159,8 @@ class Scheduled_Action {
         return $this;
     }
 
-    public function needs( string|object $job ): static {
-        $this->needs = \xwc_format_job_hook( $job );
+    public function needs( string|object ...$needs ): static {
+        $this->needs = \array_map( \xwc_format_job_hook( ... ), $needs );
 
         return $this;
     }
